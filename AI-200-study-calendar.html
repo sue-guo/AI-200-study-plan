@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI-200 学习日历</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f4ef;
+      --paper: #fffdf8;
+      --ink: #1f2933;
+      --muted: #667085;
+      --line: #ded7cc;
+      --accent: #2f6f73;
+      --accent-2: #b85c38;
+      --done: #e7f4ee;
+      --shadow: 0 14px 40px rgba(31, 41, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(120deg, rgba(47, 111, 115, 0.08), transparent 32%),
+        linear-gradient(280deg, rgba(184, 92, 56, 0.1), transparent 34%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+    }
+
+    main {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label.control {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    input[type="date"],
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+      color: var(--ink);
+      font: inherit;
+      padding: 8px 10px;
+    }
+
+    button {
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    button.secondary {
+      background: var(--paper);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .panel {
+      background: rgba(255, 253, 248, 0.82);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--paper);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress-wrap {
+      grid-column: span 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 999px;
+      background: #ece6dc;
+      overflow: hidden;
+    }
+
+    .progress > div {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 180ms ease;
+    }
+
+    .week {
+      margin-top: 24px;
+    }
+
+    .week-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin: 0 0 10px;
+    }
+
+    .week-title h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .week-title span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(148px, 1fr));
+      gap: 10px;
+    }
+
+    .day {
+      min-height: 226px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .day.done {
+      background: var(--done);
+      border-color: rgba(47, 111, 115, 0.35);
+    }
+
+    .day-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: start;
+      min-height: 42px;
+    }
+
+    .day-num {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .date {
+      display: block;
+      margin-top: 2px;
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .check {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .topic {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.3;
+      font-size: 15px;
+    }
+
+    .task {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .mini {
+      margin-top: auto;
+      display: grid;
+      gap: 7px;
+      border-top: 1px solid rgba(102, 112, 133, 0.18);
+      padding-top: 10px;
+    }
+
+    .mini label {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 7px;
+      align-items: start;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
+    .mini input {
+      margin: 1px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .project {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .project label {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 9px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 10px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .project input {
+      accent-color: var(--accent);
+    }
+
+    @media (max-width: 1180px) {
+      .calendar {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+
+      .project {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: min(100% - 20px, 620px);
+        padding-top: 18px;
+      }
+
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        justify-content: flex-start;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(130px, 1fr));
+      }
+
+      .progress-wrap {
+        grid-column: span 2;
+      }
+
+      .calendar,
+      .project {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>AI-200 学习日历</h1>
+        <p class="subtitle">6 周冲刺计划。每天完成学习、动手、笔记和复盘，勾选后会自动保存。</p>
+      </div>
+      <div class="controls">
+        <label class="control">开始日期 <input id="startDate" type="date" /></label>
+        <button id="resetDates" class="secondary" type="button">重排日期</button>
+        <button id="resetAll" type="button">清空进度</button>
+      </div>
+    </header>
+
+    <section class="panel stats" aria-label="学习进度">
+      <div class="stat"><strong id="doneDays">0</strong><span>已完成天数</span></div>
+      <div class="stat"><strong id="leftDays">42</strong><span>剩余天数</span></div>
+      <div class="stat"><strong id="percent">0%</strong><span>总体进度</span></div>
+      <div class="stat progress-wrap">
+        <span id="nextTask">下一项：Day 1</span>
+        <div class="progress"><div id="progressBar"></div></div>
+      </div>
+    </section>
+
+    <section id="weeks"></section>
+
+    <section class="week panel">
+      <div class="week-title">
+        <h2>最终项目 Checklist</h2>
+        <span>目标：做出一个可展示的 AI 文档问答服务</span>
+      </div>
+      <div id="project" class="project"></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "ai200-study-calendar-v1";
+
+    const weeks = [
+      {
+        title: "第 1 周：Python + Azure AI 基础",
+        focus: "认证、SDK、模型调用",
+        days: [
+          ["读 AI-200 大纲", "安装 Python、Azure CLI、VS Code；熟悉 Azure SDK 认证方式"],
+          ["Python 后端基础", "复习 async、HTTP API、环境变量和配置管理"],
+          ["Azure 身份认证", "掌握 DefaultAzureCredential、Managed Identity、Service Principal"],
+          ["Azure OpenAI / Foundry", "理解模型部署、chat completion、embedding"],
+          ["Python CLI 小应用", "输入问题，调用模型并返回答案"],
+          ["工程化整理", "加入配置文件、日志、异常处理和重试机制"],
+          ["周复盘", "画出认证、SDK、模型调用流程图"]
+        ]
+      },
+      {
+        title: "第 2 周：容器与 Azure 部署",
+        focus: "Docker、ACR、Container Apps、AKS",
+        days: [
+          ["Docker 基础", "学习 Dockerfile、image、container、env、port"],
+          ["应用容器化", "把 AI CLI 或简单 API 打包成容器"],
+          ["Azure Container Registry", "构建、推送、拉取镜像"],
+          ["Azure Container Apps", "部署容器应用，配置环境变量和 revision"],
+          ["KEDA 扩缩容", "理解 HTTP、Queue、Event 触发的扩缩容"],
+          ["AKS 基础", "学习 manifest、deployment、service、config map、secret"],
+          ["周复盘", "整理 Container Apps vs AKS 的考试场景"]
+        ]
+      },
+      {
+        title: "第 3 周：AI 数据服务与 RAG",
+        focus: "Cosmos DB、PostgreSQL pgvector、Redis",
+        days: [
+          ["RAG 核心概念", "学习 chunk、embedding、vector search、metadata filter"],
+          ["Cosmos DB for NoSQL", "练习 SDK CRUD、partition key、RU、consistency"],
+          ["Cosmos DB 向量检索", "存 embedding，执行相似度搜索，理解索引策略"],
+          ["PostgreSQL + pgvector", "表设计、vector 类型、索引和相似度查询"],
+          ["PostgreSQL 性能", "连接池、索引选择、查询延迟优化"],
+          ["Azure Managed Redis", "cache、expiration、invalidation、vector index"],
+          ["小型 RAG 实战", "文档入库 -> embedding -> 检索 -> 回答"]
+        ]
+      },
+      {
+        title: "第 4 周：事件、消息与 Azure Functions",
+        focus: "Functions、Service Bus、Event Grid",
+        days: [
+          ["Azure Functions 触发器", "HTTP trigger、timer trigger、queue trigger"],
+          ["Functions 绑定与部署", "练习 input/output binding、配置和部署"],
+          ["Service Bus", "queue、topic、subscription、dead-letter、message lock"],
+          ["Event Grid", "custom event、filter、retry、event-driven workflow"],
+          ["异步 AI 工作流设计", "请求入队 -> worker 处理 -> 结果存储"],
+          ["RAG 异步改造", "用 Service Bus 或 Queue-triggered Functions 处理任务"],
+          ["周复盘", "比较 Service Bus、Event Grid、Storage Queue、Functions 场景"]
+        ]
+      },
+      {
+        title: "第 5 周：安全、监控与故障排查",
+        focus: "Key Vault、App Configuration、OpenTelemetry、KQL",
+        days: [
+          ["Key Vault", "secret、key、certificate、rotation、SDK 读取"],
+          ["App Configuration", "集中配置、feature flag、Key Vault reference"],
+          ["Managed Identity", "无密码访问 Key Vault、Cosmos DB 或 Storage"],
+          ["OpenTelemetry", "trace、span、distributed tracing"],
+          ["Azure Monitor / App Insights", "logs、metrics、alerts、failures"],
+          ["KQL 查询", "查询错误、延迟、请求量、失败率"],
+          ["故障排查演练", "容器启动失败、权限失败、连接失败、超时"]
+        ]
+      },
+      {
+        title: "第 6 周：项目整合 + 考前冲刺",
+        focus: "完整项目、错题、服务选择",
+        days: [
+          ["项目整合", "RAG API + 容器部署 + Key Vault + App Configuration"],
+          ["异步处理", "加入 Service Bus 异步处理和重试"],
+          ["监控完善", "加入 Application Insights、OpenTelemetry、KQL 查询"],
+          ["官方技能点复盘", "逐条检查 AI-200 技能范围，标记弱项"],
+          ["模拟题 / 自测", "做一套练习并建立错题表"],
+          ["错题二刷", "重点看容器、RAG、消息、安全和监控"],
+          ["考前总复盘", "只看错题、架构图、服务选择表、关键命令"]
+        ]
+      }
+    ];
+
+    const projectItems = [
+      "Python FastAPI",
+      "Azure OpenAI 或 Microsoft Foundry 调用",
+      "Cosmos DB 或 PostgreSQL + pgvector",
+      "Redis cache",
+      "Service Bus 异步任务",
+      "Azure Container Apps 部署",
+      "Key Vault 管理 secrets",
+      "App Configuration 管理配置",
+      "Application Insights + OpenTelemetry",
+      "KQL 故障排查查询"
+    ];
+
+    const defaultState = () => ({
+      startDate: new Date().toISOString().slice(0, 10),
+      days: {},
+      mini: {},
+      project: {}
+    });
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        return { ...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+      } catch {
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function dateText(offset) {
+      const date = new Date(`${state.startDate}T00:00:00`);
+      date.setDate(date.getDate() + offset);
+      return date.toLocaleDateString("zh-CN", { month: "short", day: "numeric", weekday: "short" });
+    }
+
+    function render() {
+      document.getElementById("startDate").value = state.startDate;
+      const weeksEl = document.getElementById("weeks");
+      weeksEl.innerHTML = "";
+
+      let dayNumber = 1;
+      weeks.forEach((week, weekIndex) => {
+        const section = document.createElement("section");
+        section.className = "week";
+        section.innerHTML = `
+          <div class="week-title">
+            <h2>${week.title}</h2>
+            <span>${week.focus}</span>
+          </div>
+          <div class="calendar"></div>
+        `;
+
+        const calendar = section.querySelector(".calendar");
+        week.days.forEach(([topic, task], dayIndex) => {
+          const id = `day-${dayNumber}`;
+          const globalIndex = weekIndex * 7 + dayIndex;
+          const day = document.createElement("article");
+          day.className = `day ${state.days[id] ? "done" : ""}`;
+          day.innerHTML = `
+            <div class="day-head">
+              <div class="day-num">Day ${dayNumber}<span class="date">${dateText(globalIndex)}</span></div>
+              <input class="check" type="checkbox" aria-label="完成 Day ${dayNumber}" ${state.days[id] ? "checked" : ""} />
+            </div>
+            <p class="topic">${topic}</p>
+            <p class="task">${task}</p>
+            <div class="mini">
+              ${miniCheckbox(id, "study", "学文档 45-60 分钟")}
+              ${miniCheckbox(id, "hands", "动手实践 45-60 分钟")}
+              ${miniCheckbox(id, "notes", "记录 5-10 个考点")}
+              ${miniCheckbox(id, "review", "复盘/错题")}
+            </div>
+          `;
+
+          day.querySelector(".check").addEventListener("change", (event) => {
+            state.days[id] = event.target.checked;
+            saveState();
+            render();
+          });
+
+          day.querySelectorAll(".mini input").forEach((box) => {
+            box.addEventListener("change", (event) => {
+              state.mini[event.target.dataset.key] = event.target.checked;
+              saveState();
+              updateStats();
+            });
+          });
+
+          calendar.appendChild(day);
+          dayNumber += 1;
+        });
+
+        weeksEl.appendChild(section);
+      });
+
+      renderProject();
+      updateStats();
+    }
+
+    function miniCheckbox(dayId, key, label) {
+      const stateKey = `${dayId}-${key}`;
+      return `
+        <label>
+          <input data-key="${stateKey}" type="checkbox" ${state.mini[stateKey] ? "checked" : ""} />
+          <span>${label}</span>
+        </label>
+      `;
+    }
+
+    function renderProject() {
+      const project = document.getElementById("project");
+      project.innerHTML = "";
+      projectItems.forEach((item, index) => {
+        const id = `project-${index}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" ${state.project[id] ? "checked" : ""} /> <span>${item}</span>`;
+        label.querySelector("input").addEventListener("change", (event) => {
+          state.project[id] = event.target.checked;
+          saveState();
+        });
+        project.appendChild(label);
+      });
+    }
+
+    function updateStats() {
+      const done = Object.values(state.days).filter(Boolean).length;
+      const total = 42;
+      const percent = Math.round((done / total) * 100);
+      const next = Array.from({ length: total }, (_, i) => i + 1).find((day) => !state.days[`day-${day}`]);
+
+      document.getElementById("doneDays").textContent = done;
+      document.getElementById("leftDays").textContent = total - done;
+      document.getElementById("percent").textContent = `${percent}%`;
+      document.getElementById("progressBar").style.width = `${percent}%`;
+      document.getElementById("nextTask").textContent = next ? `下一项：Day ${next}` : "全部完成，可以约考试了";
+    }
+
+    document.getElementById("startDate").addEventListener("change", (event) => {
+      state.startDate = event.target.value;
+      saveState();
+    });
+
+    document.getElementById("resetDates").addEventListener("click", () => {
+      saveState();
+      render();
+    });
+
+    document.getElementById("resetAll").addEventListener("click", () => {
+      if (!confirm("确定要清空所有学习进度吗？")) return;
+      state = { ...defaultState(), startDate: state.startDate };
+      saveState();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
